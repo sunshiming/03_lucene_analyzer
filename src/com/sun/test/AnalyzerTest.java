@@ -25,4 +25,18 @@ public class AnalyzerTest {
 		AnalyzerUtil.displayToken(txt, a3);
 		AnalyzerUtil.displayToken(txt, a4);
 	}
+	
+	@Test
+	public void test02(){
+		Analyzer a1 = new StandardAnalyzer(Version.LUCENE_35);
+		Analyzer a2 = new StopAnalyzer(Version.LUCENE_35);
+		Analyzer a3 = new SimpleAnalyzer(Version.LUCENE_35);
+		Analyzer a4 = new WhitespaceAnalyzer(Version.LUCENE_35);
+		
+		String txt = "This is my house and I came from shandong";
+		AnalyzerUtil.displayAllTokenInfo(txt, a1);
+		AnalyzerUtil.displayAllTokenInfo(txt, a2);
+		AnalyzerUtil.displayAllTokenInfo(txt, a3);
+		AnalyzerUtil.displayAllTokenInfo(txt, a4);
+	}
 }
