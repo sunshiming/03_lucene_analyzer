@@ -7,11 +7,25 @@ import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.analysis.StopAnalyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.junit.Test;
 
 import com.chenlb.mmseg4j.analysis.MMSegAnalyzer;
 import com.sun.analyzer.MyStopAnalyzer;
+import com.sun.analyzer.MySynonymAnalyzer;
+import com.sun.context.SimpleSynonymContext;
 import com.sun.utils.AnalyzerUtil;
 
 public class AnalyzerTest {
@@ -53,5 +67,32 @@ public class AnalyzerTest {
 		String str = "I am a teacher and I like swimming";
 		Analyzer a1 = new MyStopAnalyzer(stops);
 		AnalyzerUtil.displayToken(str, a1);
+	}
+	
+	@Test
+	public void testSynonymWord(){
+		try {
+			String str = "我们一起去跳舞莱芜市，人民大会堂";
+			Analyzer a1 = new MySynonymAnalyzer(new SimpleSynonymContext());
+			
+			Directory dir = new RAMDirectory();
+			IndexWriter writer = new IndexWriter(dir, new IndexWriterConfig(Version.LUCENE_35, a1));
+			Document document = new Document();
+			document.add(new Field("content", str, Field.Store.YES, Field.Index.ANALYZED));
+			writer.addDocument(document);			
+			writer.close();
+			
+			IndexSearcher searcher = new IndexSearcher(IndexReader.open(dir));
+			TopDocs tds = searcher.search(new TermQuery(new Term("content", "家乡")), 10);
+			ScoreDoc[] sds = tds.scoreDocs;
+			Document doc = searcher.doc(sds[0].doc);
+			System.out.println(doc.get("content"));
+			
+			AnalyzerUtil.displayAllTokenInfo(str, a1);
+//			AnalyzerUtil.displayToken(str, a1);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
